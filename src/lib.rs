@@ -14,10 +14,15 @@ impl Config {
             return Err("not enough arguments");
         }
 
-        let query = args[1].clone();
-        let file_path = args[2].clone();
+        let (query_index, file_path_index, mut ignore_case) = if args.len() > 3 && args[1] == "-i" {
+            (2, 3, true)
+        } else {
+            (1, 2, false)
+        };
+        let query = args[query_index].clone();
+        let file_path = args[file_path_index].clone();
 
-        let ignore_case = env::var("IGNORE_CASE").is_ok();
+        ignore_case = ignore_case || env::var("IGNORE_CASE").is_ok();
 
         Ok(Config {
             query,
@@ -120,4 +125,19 @@ Trust me.";
         assert_eq!(result.query, "to");
         assert_eq!(result.file_path, "poem.txt");
     }
+
+    #[test]
+    fn config_can_set_case_insensitive() {
+        let result = Config::build(&[
+            String::from("minigrep"),
+            String::from("-i"),
+            String::from("to"),
+            String::from("poem.txt"),
+        ])
+        .unwrap();
+
+        assert!(result.ignore_case)
+    }
+
+    // In the real world, test for and handle args.len() > 3 && args[1] != "-i"
 }
