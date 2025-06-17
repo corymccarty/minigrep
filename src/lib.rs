@@ -98,4 +98,26 @@ Trust me.";
             search_case_insensitive(query, contents)
         );
     }
+
+    #[test]
+    fn config_error_too_few_arguments() {
+        let result = Config::build(&[String::from("foo")]);
+        match result {
+            Ok(_) => panic!("This should fail"),
+            Err(e) => assert!(e.to_lowercase().contains("arguments")),
+        }
+    }
+
+    #[test]
+    fn config_three_arguments() {
+        let result = Config::build(&[
+            String::from("minigrep"),
+            String::from("to"),
+            String::from("poem.txt"),
+        ])
+        .unwrap();
+
+        assert_eq!(result.query, "to");
+        assert_eq!(result.file_path, "poem.txt");
+    }
 }
